@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Гистоатлас к колку</title>
+<meta name="description" content="Интерактивные препараты, электронограммы, теория и тесты по темам 14–21">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+html{color-scheme:light}
+img{max-width:100%}
+[hidden]{display:none!important}
+:root{
+  --bg:#F3F1F6; --surface:#FFFFFF; --surface-2:#ECE8F2; --line:#DCD6E6;
+  --ink:#1F1A2E; --ink-2:#4D4660; --muted:#7A7390;
+  --hema:#4A3A93; --hema-soft:#E6E1F5; --eosin:#C8336D; --eosin-soft:#FBE4ED;
+  --ok:#1E7F5C; --ok-soft:#DDF3EA; --bad:#B4322F; --bad-soft:#F9E1E0;
+  --pin:#C8336D; --shadow:0 1px 2px rgba(31,26,46,.06),0 6px 24px rgba(31,26,46,.07);
+  --f-display:"Unbounded","Golos Text",system-ui,sans-serif;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--bg:#14121B;--surface:#1D1A27;--surface-2:#262233;--line:#363049;
+  --ink:#EEEAF6;--ink-2:#C2BBD4;--muted:#9189A8;--hema:#A898F2;--hema-soft:#2C2645;--eosin:#F2779F;--eosin-soft:#3A2030;
+  --ok:#57C99C;--ok-soft:#173228;--bad:#F08A86;--bad-soft:#3A1E1E;--pin:#F2779F;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.25);}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--bg:#14121B;--surface:#1D1A27;--surface-2:#262233;--line:#363049;
+  --ink:#EEEAF6;--ink-2:#C2BBD4;--muted:#9189A8;--hema:#A898F2;--hema-soft:#2C2645;--eosin:#F2779F;--eosin-soft:#3A2030;
+  --ok:#57C99C;--ok-soft:#173228;--bad:#F08A86;--bad-soft:#3A1E1E;--pin:#F2779F;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.25);}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--eosin);outline-offset:2px}
+.app{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100%}
+/* sidebar */
+.side{background:var(--surface);border-right:1px solid var(--line);padding:22px 14px;position:sticky;top:env(safe-area-inset-top,0px);height:100vh;overflow:auto}
+.brand{padding:0 8px 18px}
+.brand h1{font:700 19px/1.15 var(--f-display);letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance}
+.brand h1 span{color:var(--eosin)}
+.brand p{margin:0;color:var(--muted);font-size:12.5px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav-label{font:600 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:14px 10px 6px}
+.nav button{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;text-align:left;background:none;border:0;border-radius:10px;padding:8px 10px}
+.nav button:hover{background:var(--surface-2)}
+.nav button[aria-current="true"]{background:var(--hema-soft)}
+.nav .num{font:700 12px var(--f-mono);color:var(--hema)}
+.nav .nt{font-size:13.5px;line-height:1.25;min-width:0}
+.nav .score{font:600 11px var(--f-mono);color:var(--muted)}
+.nav .score.good{color:var(--ok)}
+.theme-row{display:flex;gap:6px;padding:18px 8px 0}
+.theme-row button{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 0;font-size:12px;color:var(--ink-2)}
+.theme-row button[aria-pressed="true"]{border-color:var(--hema);color:var(--hema)}
+/* main */
+.main{padding-block:24px 60px;padding-inline:clamp(16px,3vw,40px);min-width:0}
+.ch-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+.eyebrow{font:600 11.5px var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--eosin)}
+.ch-head h2{font:700 clamp(22px,3vw,30px)/1.15 var(--f-display);margin:4px 0 0;letter-spacing:-.015em;text-wrap:balance}
+.tabs{display:flex;gap:4px;background:var(--surface-2);padding:4px;border-radius:12px;flex-wrap:wrap}
+.tabs button{border:0;background:none;padding:8px 14px;border-radius:9px;font-weight:500;color:var(--ink-2);font-size:14px}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+/* prep picker */
+.picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px 6px 6px;display:flex;align-items:center;gap:8px;font-size:13.5px}
+.chip b{font:700 11.5px var(--f-mono);background:var(--surface-2);color:var(--hema);border-radius:999px;padding:3px 8px}
+.chip[aria-pressed="true"]{border-color:var(--hema);background:var(--hema-soft)}
+.chip[aria-pressed="true"] b{background:var(--hema);color:var(--surface)}
+.viewer{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.stage-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line)}
+.stage-meta{font-size:13px;color:var(--ink-2)}
+.stage-meta b{font-weight:600;color:var(--ink)}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.tool{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:12.5px;display:flex;gap:6px;align-items:center}
+.tool[aria-pressed="true"]{background:var(--eosin);border-color:var(--eosin);color:#fff}
+.scroller{overflow:auto;max-height:78vh;background:#fff}
+.imgwrap{position:relative;width:100%;line-height:0}
+.imgwrap.zoom{width:200%}
+.imgwrap img{width:100%;height:auto;display:block;max-width:none}
+.pin{position:absolute;transform:translate(-50%,-50%);width:34px;height:22px;border-radius:6px;border:2px solid transparent;background:transparent;padding:0;line-height:1}
+.pin:hover{border-color:var(--pin);background:rgba(200,51,109,.12)}
+.pin.sel{border-color:var(--pin);box-shadow:0 0 0 3px rgba(200,51,109,.35);animation:pulse 1.4s ease-out 1}
+.pin.same{border-color:var(--pin)}
+.hide .pin{background:#4A3A93;border-color:#fff;color:#fff;font:700 12px var(--f-mono);width:40px;height:24px;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.hide .pin::after{content:"?"}
+.hide .pin.done{background:#1E7F5C}
+.hide .pin.done::after{content:attr(data-l)}
+.hide .pin.miss{background:#B4322F}
+.hide .pin.miss::after{content:attr(data-l)}
+.hide .pin.sel{background:#C8336D}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,51,109,.6)}100%{box-shadow:0 0 0 14px rgba(200,51,109,0)}}
+@media (prefers-reduced-motion:reduce){.pin.sel{animation:none}}
+.thumbs{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.thumbs button{border:2px solid transparent;border-radius:8px;padding:0;overflow:hidden;width:92px;height:60px;background:var(--surface-2)}
+.thumbs button img{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs button[aria-pressed="true"]{border-color:var(--eosin)}
+.how{padding:12px 14px;font-size:13.5px;color:var(--ink-2);border-top:1px solid var(--line);background:var(--surface)}
+.how b{color:var(--ink)}
+/* side panel */
+.panel{display:flex;flex-direction:column;gap:14px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.card.detail{border-color:var(--hema);box-shadow:var(--shadow)}
+.lbl{font:700 12px var(--f-mono);display:inline-block;background:#FFE94A;color:#1F1A2E;border:1px solid #D9C000;border-radius:5px;padding:2px 7px}
+.detail h3{font:700 18px/1.25 var(--f-display);margin:10px 0 2px;letter-spacing:-.01em;text-wrap:balance}
+.detail .sub{color:var(--muted);font-size:13px;margin-bottom:8px}
+.facet{display:grid;gap:3px;padding:9px 0;border-top:1px dashed var(--line)}
+.facet:first-of-type{border-top:0}
+.facet h4{margin:0;font:600 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--hema)}
+.facet.sig h4{color:var(--eosin)}
+.facet p{margin:0;font-size:14px;max-width:65ch}
+.note{background:var(--eosin-soft);border-radius:10px;padding:9px 12px;font-size:13.5px;margin-top:6px}
+.also{font-size:12.5px;color:var(--muted);margin-top:8px}
+.also button{border:0;background:none;padding:0;color:var(--hema);text-decoration:underline;text-underline-offset:2px;font-size:12.5px}
+.empty{color:var(--muted);font-size:14px}
+.empty strong{color:var(--ink);display:block;font:700 15px var(--f-display);margin-bottom:6px}
+.legend h4{margin:0 0 8px;font:600 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.legend ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;max-height:340px;overflow:auto}
+.legend li button{width:100%;display:grid;grid-template-columns:62px 1fr;gap:8px;text-align:left;border:0;background:none;padding:5px 6px;border-radius:7px;font-size:13.5px;align-items:baseline}
+.legend li button:hover{background:var(--surface-2)}
+.legend li button[aria-current="true"]{background:var(--hema-soft)}
+.legend .k{font:700 12px var(--f-mono);color:var(--hema)}
+.legend .off{opacity:.55}
+/* self-check */
+.qbox h3{font:700 16px var(--f-display);margin:8px 0 10px}
+.opts{display:grid;gap:6px}
+.opt{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 12px;text-align:left;font-size:14px}
+.opt:hover:not([disabled]){border-color:var(--hema)}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt[disabled]{cursor:default}
+.tally{display:flex;gap:14px;font:600 13px var(--f-mono);color:var(--ink-2);margin-top:10px}
+.tally .g{color:var(--ok)}.tally .r{color:var(--bad)}
+/* EM */
+.emgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.emcard{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:0;overflow:hidden;text-align:left;display:flex;flex-direction:column}
+.emcard img{width:100%;height:150px;object-fit:cover;filter:grayscale(1);display:block}
+.emcard div{padding:10px 12px}
+.emcard b{display:block;font-size:14px;line-height:1.3}
+.emcard small{font:500 11.5px var(--f-mono);color:var(--muted)}
+.emcard[aria-pressed="true"]{border-color:var(--eosin)}
+.emview{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;margin-top:18px;align-items:start}
+.emview .scroller{background:#000;max-height:80vh}
+.emlist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.emlist li{display:grid;grid-template-columns:56px 1fr;gap:10px;font-size:14px}
+.emlist .k{font:700 12.5px var(--f-mono);color:var(--eosin)}
+.emlist small{display:block;color:var(--muted);font-size:12.5px}
+/* theory */
+.theory{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+.prose{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 26px 22px}
+.prose h3{font:700 17px/1.3 var(--f-display);margin:22px 0 8px;color:var(--hema);letter-spacing:-.01em}
+.prose p,.prose li{max-width:70ch}
+.prose ul,.prose ol{padding-left:20px}
+.prose li{margin:4px 0}
+.prose table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+.tablewrap{overflow-x:auto}
+.prose th,.prose td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+.prose th{font-weight:600;color:var(--ink-2);background:var(--surface-2)}
+.aside h4{margin:0 0 10px;font:600 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.diff{display:grid;gap:10px}
+.diff div{border-left:3px solid var(--eosin);padding-left:10px}
+.diff b{display:block;font-size:14px}
+.diff span{font-size:13.5px;color:var(--ink-2)}
+.qlist{margin:0;padding-left:18px;font-size:13.5px;color:var(--ink-2);display:grid;gap:6px}
+/* quiz */
+.quiz{max-width:760px}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;flex:1;min-width:120px}
+.bar i{display:block;height:100%;background:var(--hema);transition:width .3s}
+.qcount{font:600 13px var(--f-mono);color:var(--ink-2)}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.qcard h3{font:600 18px/1.4 var(--f-body);margin:0 0 14px;text-wrap:balance}
+.qimg{position:relative;line-height:0;margin:0 0 14px;border-radius:10px;overflow:hidden;background:#fff}
+.qimg img{width:100%;display:block}
+.qimg .mark{position:absolute;transform:translate(-50%,-50%);width:44px;height:26px;border-radius:6px;background:#C8336D;border:2px solid #fff;box-shadow:0 0 0 4px rgba(200,51,109,.35);color:#fff;font:700 13px/22px var(--f-mono);text-align:center}
+.explain{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:14px}
+.explain.ok{background:var(--ok-soft)}.explain.no{background:var(--bad-soft)}
+.explain b{display:block;margin-bottom:2px}
+.qnav{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.btn{border:0;background:var(--hema);color:#fff;border-radius:10px;padding:10px 18px;font-weight:600}
+:root[data-theme="dark"] .btn{color:#14121B}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{color:#14121B}}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.result{text-align:center;padding:30px 20px}
+.result .big{font:700 56px/1 var(--f-display);color:var(--hema)}
+.result p{color:var(--ink-2)}
+.review{text-align:left;margin-top:18px;display:grid;gap:8px}
+.review div{font-size:13.5px;padding:8px 12px;border-radius:8px;background:var(--bad-soft)}
+.quiz-intro{display:grid;gap:10px}
+.quiz-intro .row{display:flex;gap:10px;flex-wrap:wrap}
+/* responsive */
+@media (max-width:1100px){.viewer,.emview,.theory{grid-template-columns:minmax(0,1fr)}.panel{position:static}}
+@media (max-width:760px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:5;padding:12px 16px 10px;border-right:0;border-bottom:1px solid var(--line)}
+  .brand{padding:0 0 8px}.brand p,.theme-row,.nav-label{display:none}
+  .brand h1{font-size:16px;margin:0}
+  .nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:2px}
+  .nav button{grid-template-columns:auto auto;flex:0 0 auto;border:1px solid var(--line);padding:6px 10px}
+  .nav .nt{display:none}.nav .score{display:none}
+  .nav button .short{display:inline;font-size:12.5px}
+  .prose{padding:4px 16px 16px}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;width:100%}
+  .tabs button{flex:0 0 auto;padding:7px 11px}
+  .ch-head h2{font-size:21px}
+  .hide .pin{width:30px;height:19px;font-size:10.5px}
+  .pin{width:28px;height:19px}
+  .scroller{max-height:none}
+}
+.nav .short{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <h1>Гисто<span>атлас</span> к колку</h1>
+      <p>Темы 14–21 · ПИМУ · нажми на номер на снимке</p>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="theme-row" role="group" aria-label="Тема оформления">
+      <button id="th-light" aria-pressed="false">Светлая</button>
+      <button id="th-auto" aria-pressed="true">Авто</button>
+      <button id="th-dark" aria-pressed="false">Тёмная</button>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<script src="structs.js"></script>
+<script src="data.js"></script>
+<script src="pins.js"></script>
+<script>
+(function(){
+const S=window.S,P=window.PREPS,EM=window.EM,CH=window.CH,IMG=window.IMG;
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem('gisto:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('gisto:'+k,JSON.stringify(v))}catch(e){}}};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const sortLabels=(a,b)=>{const pa=a.split('.'),pb=b.split('.');const na=isNaN(+pa[0]),nb=isNaN(+pb[0]);if(na!==nb)return na?1:-1;for(let i=0;i<Math.max(pa.length,pb.length);i++){if(pa[i]==null)return -1;if(pb[i]==null)return 1;const x=+pa[i],y=+pb[i];if(!isNaN(x)&&!isNaN(y)&&x!==y)return x-y;if(isNaN(x)||isNaN(y)){const c=String(pa[i]).localeCompare(String(pb[i]),'ru');if(c)return c}}return 0};
+
+// где ещё встречается структура
+const WHERE={};for(const [id,p] of Object.entries(P))for(const [l,v] of Object.entries(p.L)){(WHERE[v[0]]=WHERE[v[0]]||[]).push(id)}
+const SHORT={t14:'Сосуды, сердце',t15:'Костный мозг, тимус',t16:'Лимфоузел, селезёнка',t17:'Ротовая полость',t18:'Пищевод, желудок',t19:'Кишечник',t20:'Железы',t21:'Печень'};
+const prepChapter=id=>CH.find(c=>c.preps.includes(id));
+
+const st={ch:store.get('ch','t14'),tab:store.get('tab','preps'),prep:null,img:0,sel:null,hide:false,zoom:false,em:null,
+  sc:{done:{},miss:{},q:null},quiz:null};
+let SCORES=store.get('scores',{});
+
+/* theme */
+function applyTheme(t){const r=document.documentElement;if(t==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t);
+  ['light','auto','dark'].forEach(x=>$('#th-'+x).setAttribute('aria-pressed',String(x===t)));store.set('theme',t)}
+['light','auto','dark'].forEach(x=>$('#th-'+x).onclick=()=>applyTheme(x));applyTheme(store.get('theme','auto'));
+
+/* nav */
+function renderNav(){
+  const n=$('#nav');let h='<div class="nav-label">Темы</div>';
+  for(const c of CH){const s=SCORES[c.id];
+    h+=`<button data-ch="${c.id}" aria-current="${st.ch===c.id}"><span class="num">Т${c.n}</span><span class="nt">${esc(c.t)}</span><span class="short">${esc(SHORT[c.id]||c.t)}</span><span class="score ${s>=80?'good':''}">${s!=null?s+'%':''}</span></button>`}
+  const s=SCORES.final;
+  h+=`<div class="nav-label">Проверка</div><button data-ch="final" aria-current="${st.ch==='final'}"><span class="num">Σ</span><span class="nt">Итоговый тест по всем темам</span><span class="short">Итог</span><span class="score ${s>=80?'good':''}">${s!=null?s+'%':''}</span></button>`;
+  n.innerHTML=h;
+  n.querySelectorAll('button[data-ch]').forEach(b=>b.onclick=()=>{st.ch=b.dataset.ch;st.prep=null;st.em=null;st.sel=null;st.quiz=null;if(st.ch==='final')st.tab='quiz';store.set('ch',st.ch);render();window.scrollTo(0,0)});
+}
+
+function render(){renderNav();const m=$('#main');
+  if(st.ch==='final'){m.innerHTML=`<div class="ch-head"><div><div class="eyebrow">Все темы 14–21</div><h2>Итоговый тест</h2></div></div><div id="tabbody"></div>`;renderQuiz();return}
+  const c=CH.find(x=>x.id===st.ch)||CH[0];st.ch=c.id;
+  const tabs=[['preps','Препараты'],['em','Электронограммы'],['theory','Теория'],['quiz','Тест']];
+  m.innerHTML=`<div class="ch-head"><div><div class="eyebrow">Тема ${c.n}</div><h2>${esc(c.t)}</h2></div>
+  <div class="tabs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${t}</button>`).join('')}</div></div><div id="tabbody"></div>`;
+  m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;store.set('tab',st.tab);st.quiz=null;render()});
+  ({preps:renderPreps,em:renderEM,theory:renderTheory,quiz:renderQuiz})[st.tab]();
+}
+
+/* ===== ПРЕПАРАТЫ ===== */
+function renderPreps(){
+  const c=CH.find(x=>x.id===st.ch);if(!st.prep||!c.preps.includes(st.prep)){st.prep=c.preps[0];st.img=0;st.sel=null}
+  const p=P[st.prep],imgKey=p.imgs[st.img],im=IMG[imgKey];
+  const labelsHere=new Set(im.p.map(x=>x[2]));
+  const body=$('#tabbody');
+  body.innerHTML=`
+  <div class="picker">${c.preps.map(id=>`<button class="chip" data-prep="${id}" aria-pressed="${id===st.prep}"><b>№${id}</b>${esc(P[id].t.replace(/\s*\(пр\..*\)/,''))}</button>`).join('')}</div>
+  <div class="viewer">
+    <div class="stage">
+      <div class="stage-bar">
+        <div class="stage-meta"><b>Препарат №${st.prep}.</b> ${esc(p.t)} · окраска: ${esc(p.stain)}</div>
+        <div class="tools">
+          <button class="tool" id="t-hide" aria-pressed="${st.hide}">Самопроверка: скрыть номера</button>
+          <button class="tool" id="t-zoom" aria-pressed="${st.zoom}">Увеличить ×2</button>
+        </div>
+      </div>
+      <div class="scroller"><div class="imgwrap ${st.zoom?'zoom':''} ${st.hide?'hide':''}" id="iw">
+        <img src="${im.f}" width="${im.w}" height="${im.h}" alt="${esc(p.t)}">
+        ${im.p.map((q,i)=>{const cls=st.hide?(st.sc.done[imgKey+i]?'done':st.sc.miss[imgKey+i]?'miss':''):'';
+          return `<button class="pin ${cls} ${st.sel&&st.sel.i===i?'sel':''} ${st.sel&&!st.hide&&st.sel.l===q[2]&&st.sel.i!==i?'same':''}" data-i="${i}" data-l="${esc(q[2])}" style="left:${q[0]}%;top:${q[1]}%" aria-label="Метка ${esc(q[2])}"></button>`}).join('')}
+      </div></div>
+      ${p.imgs.length>1?`<div class="thumbs">${p.imgs.map((k,i)=>`<button data-img="${i}" aria-pressed="${i===st.img}" title="${i===0?'Малое увеличение':'Большое увеличение'}"><img src="${IMG[k].f}" alt=""></button>`).join('')}</div>`:''}
+      <div class="how"><b>Как узнать препарат:</b> ${esc(p.how)}</div>
+    </div>
+    <div class="panel" id="panel"></div>
+  </div>`;
+  body.querySelectorAll('[data-prep]').forEach(b=>b.onclick=()=>{st.prep=b.dataset.prep;st.img=0;st.sel=null;resetSC();renderPreps()});
+  body.querySelectorAll('[data-img]').forEach(b=>b.onclick=()=>{st.img=+b.dataset.img;st.sel=null;resetSC();renderPreps()});
+  $('#t-hide').onclick=()=>{st.hide=!st.hide;st.sel=null;resetSC();renderPreps()};
+  $('#t-zoom').onclick=()=>{st.zoom=!st.zoom;renderPreps()};
+  body.querySelectorAll('.pin').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;st.sel={i,l:im.p[i][2]};if(st.hide)st.sc.q=makeSC(p,im,i);renderPreps()});
+  renderPanel(p,im,imgKey,labelsHere);
+}
+function resetSC(){st.sc={done:{},miss:{},q:null}}
+function makeSC(p,im,i){
+  const right=im.p[i][2];const pool=[...new Set(im.p.map(x=>x[2]))].filter(l=>l!==right&&S[p.L[l][0]].name!==S[p.L[right][0]].name);
+  let others=shuffle(pool).slice(0,3);if(others.length<3)others=others.concat(shuffle(Object.keys(p.L).filter(l=>l!==right&&!others.includes(l))).slice(0,3-others.length));
+  return {i,right,opts:shuffle([right,...others]),ans:null};
+}
+function detailHTML(p,label){
+  const [k,name,note]=p.L[label];const s=S[k];
+  const other=(WHERE[k]||[]).filter(id=>id!==st.prep);
+  return `<div class="card detail">
+    <span class="lbl">${esc(label)}</span>
+    <h3>${esc(name)}</h3>${s.name!==name?`<div class="sub">${esc(s.name)}</div>`:''}
+    <div class="facet"><h4>Как выглядит на препарате</h4><p>${esc(s.look)}</p></div>
+    <div class="facet"><h4>Функция</h4><p>${esc(s.func)}</p></div>
+    <div class="facet"><h4>Виды и состав</h4><p>${esc(s.types)}</p></div>
+    <div class="facet sig"><h4>Значение</h4><p>${esc(s.sig)}</p></div>
+    ${note?`<div class="note"><b>На этом препарате:</b> ${esc(note)}</div>`:''}
+    ${other.length?`<div class="also">Встречается также: ${other.map(id=>`<button data-go="${id}">№${id} ${esc(P[id].t.split(' (')[0])}</button>`).join(', ')}</div>`:''}
+  </div>`;
+}
+function renderPanel(p,im,imgKey,labelsHere){
+  const panel=$('#panel');let top='';
+  if(st.hide){
+    const total=im.p.length,d=Object.keys(st.sc.done).length,ms=Object.keys(st.sc.miss).length;
+    const q=st.sc.q;
+    if(q){const answered=q.ans!=null;
+      top=`<div class="card qbox"><span class="lbl">?</span><h3>Что обозначено этой меткой?</h3><div class="opts">${q.opts.map(l=>{
+        let cls='';if(answered){if(l===q.right)cls='right';else if(l===q.ans)cls='wrong'}
+        return `<button class="opt ${cls}" data-o="${esc(l)}" ${answered?'disabled':''}>${esc(p.L[l][1])}</button>`}).join('')}</div>
+        <div class="tally"><span class="g">верно ${d}</span><span class="r">ошибок ${ms}</span><span>из ${total}</span></div></div>`;
+      if(answered)top+=detailHTML(p,q.right);
+    } else top=`<div class="card empty"><strong>Режим самопроверки</strong>Номера скрыты. Нажми на любую метку «?» и выбери, что она обозначает. Зелёные — угаданные, красные — ошибки.<div class="tally"><span class="g">верно ${d}</span><span class="r">ошибок ${ms}</span><span>из ${total}</span></div></div>`;
+  } else if(st.sel){top=detailHTML(p,st.sel.l)}
+  else top=`<div class="card empty"><strong>Нажми на номер на снимке</strong>Откроется карточка структуры: как она выглядит, её функция, виды и значение. Или выбери строку в легенде ниже.</div>`;
+  const labels=Object.keys(p.L).sort(sortLabels);
+  const legend=st.hide?'':`<div class="card legend"><h4>Обозначения к препарату</h4><ol>${labels.map(l=>`<li><button data-leg="${esc(l)}" class="${labelsHere.has(l)?'':'off'}" aria-current="${st.sel&&st.sel.l===l}"><span class="k">${esc(l)}</span><span>${esc(p.L[l][1])}${labelsHere.has(l)?'':' <small>(на другом снимке)</small>'}</span></button></li>`).join('')}</ol></div>`;
+  panel.innerHTML=top+legend;
+  panel.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const q=st.sc.q;q.ans=b.dataset.o;const key=imgKey+q.i;if(q.ans===q.right){st.sc.done[key]=1;delete st.sc.miss[key]}else st.sc.miss[key]=1;renderPreps()});
+  panel.querySelectorAll('[data-leg]').forEach(b=>b.onclick=()=>{const l=b.dataset.leg;let i=im.p.findIndex(x=>x[2]===l);
+    if(i<0){const j=p.imgs.findIndex(k=>IMG[k].p.some(x=>x[2]===l));if(j>=0){st.img=j;i=IMG[p.imgs[j]].p.findIndex(x=>x[2]===l)}}
+    st.sel={i,l};renderPreps();const pin=document.querySelector(`.pin[data-i="${i}"]`);if(pin&&pin.scrollIntoView)pin.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})});
+  panel.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const id=b.dataset.go;const k=p.L[st.sel?st.sel.l:st.sc.q.right][0];const c=prepChapter(id);
+    st.ch=c.id;st.prep=id;st.hide=false;const l=Object.keys(P[id].L).find(x=>P[id].L[x][0]===k);
+    st.img=Math.max(0,P[id].imgs.findIndex(im=>IMG[im].p.some(x=>x[2]===l)));const i=IMG[P[id].imgs[st.img]].p.findIndex(x=>x[2]===l);st.sel={i,l};store.set('ch',st.ch);render();window.scrollTo(0,0)});
+}
+
+/* ===== ЭЛЕКТРОНОГРАММЫ ===== */
+function renderEM(){
+  const c=CH.find(x=>x.id===st.ch);if(!st.em||!c.em.includes(st.em))st.em=c.em[0];const e=EM[st.em];
+  $('#tabbody').innerHTML=`<div class="emgrid">${c.em.map(id=>`<button class="emcard" data-em="${id}" aria-pressed="${id===st.em}"><img src="img/em_${id}.jpg" alt=""><div><small>№${id} ${esc(EM[id].x)}</small><b>${esc(EM[id].t)}</b></div></button>`).join('')}</div>
+  <div class="emview"><div class="stage"><div class="stage-bar"><div class="stage-meta"><b>Электронограмма №${st.em}.</b> ${esc(e.t)} ${e.x?'· '+esc(e.x):''}</div><div class="tools"><button class="tool" id="t-zoom" aria-pressed="${st.zoom}">Увеличить ×2</button></div></div>
+  <div class="scroller"><div class="imgwrap ${st.zoom?'zoom':''}"><img src="img/em_${st.em}.jpg" alt="${esc(e.t)}"></div></div></div>
+  <div class="panel"><div class="card detail"><span class="lbl">№${st.em}</span><h3>${esc(e.t)}</h3><div class="sub">Буквы и цифры — те, что нанесены на снимок</div>
+  <ul class="emlist">${e.L.map(([k,n,d])=>`<li><span class="k">${esc(k)}</span><span>${esc(n)}${d?`<small>${esc(d)}</small>`:''}</span></li>`).join('')}</ul>
+  <div class="note" style="margin-top:14px"><b>Главное:</b> ${esc(e.d)}</div></div></div></div>`;
+  document.querySelectorAll('[data-em]').forEach(b=>b.onclick=()=>{st.em=b.dataset.em;renderEM()});
+  $('#t-zoom').onclick=()=>{st.zoom=!st.zoom;renderEM()};
+}
+
+/* ===== ТЕОРИЯ ===== */
+function renderTheory(){
+  const c=CH.find(x=>x.id===st.ch);
+  $('#tabbody').innerHTML=`<div class="theory"><article class="prose">${c.theory.replace(/<table>/g,'<div class="tablewrap"><table>').replace(/<\/table>/g,'</table></div>')}</article>
+  <aside class="panel"><div class="card aside"><h4>Как различить препараты</h4><div class="diff">${c.diff.map(([a,b])=>`<div><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('')}</div></div>
+  <div class="card aside"><h4>Вопросы по теме (из методички)</h4><ol class="qlist">${c.q.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div></aside></div>`;
+}
+
+/* ===== ТЕСТ ===== */
+function imageQuestions(prepIds,n){
+  const all=[];for(const id of prepIds){const p=P[id];for(const k of p.imgs){IMG[k].p.forEach((q,i)=>all.push({id,k,i,l:q[2]}))}}
+  const picked=[],seen=new Set();for(const x of shuffle(all)){const key=x.id+'|'+P[x.id].L[x.l][0];if(seen.has(key))continue;seen.add(key);picked.push(x);if(picked.length>=n)break}
+  return picked.map(x=>{const p=P[x.id],right=p.L[x.l][1],rk=p.L[x.l][0];
+    const pool=[...new Set(Object.values(p.L).filter(v=>v[0]!==rk&&S[v[0]].name!==S[rk].name).map(v=>v[1]))];
+    const opts=shuffle([right,...shuffle(pool).slice(0,3)]);
+    return {img:x.k,pin:IMG[x.k].p[x.i],q:`Препарат №${x.id} «${p.t.split(' (')[0]}». Что отмечено розовой меткой?`,opts,a:opts.indexOf(right),ex:S[rk].look,key:rk}});
+}
+function buildQuiz(){
+  if(st.ch==='final'){let qs=[];for(const c of CH)qs=qs.concat(shuffle(c.quiz).slice(0,2).map(t=>({q:t[0],opts:t[1],a:t[2],ex:t[3]})));
+    qs=qs.concat(imageQuestions(CH.flatMap(c=>c.preps),8));return shuffle(qs).map(shuffleOpts)}
+  const c=CH.find(x=>x.id===st.ch);
+  const qs=c.quiz.map(t=>({q:t[0],opts:t[1],a:t[2],ex:t[3]})).concat(imageQuestions(c.preps,6));
+  return shuffle(qs).map(shuffleOpts);
+}
+function shuffleOpts(q){if(q.img)return q;const idx=shuffle(q.opts.map((_,i)=>i));return {...q,opts:idx.map(i=>q.opts[i]),a:idx.indexOf(q.a)}}
+function renderQuiz(){
+  const body=$('#tabbody');const key=st.ch;
+  if(!st.quiz){const c=CH.find(x=>x.id===st.ch);const best=SCORES[key];
+    const count=st.ch==='final'?CH.length*2+8:c.quiz.length+6;
+    body.innerHTML=`<div class="quiz"><div class="qcard quiz-intro"><h3>${st.ch==='final'?'Смешанный тест по всем темам':'Тест по теме '+c.n}</h3>
+    <p style="margin:0;color:var(--ink-2)">${count} вопросов: вопросы по теории и распознавание структур на снимках препаратов. После каждого ответа — объяснение. ${best!=null?`Лучший результат: <b>${best}%</b>.`:''}</p>
+    <div class="row"><button class="btn" id="qstart">Начать тест</button></div></div></div>`;
+    $('#qstart').onclick=()=>{st.quiz={qs:buildQuiz(),i:0,ans:[],done:false};renderQuiz()};return}
+  const Q=st.quiz;
+  if(Q.done){const right=Q.ans.filter((a,i)=>a===Q.qs[i].a).length,pct=Math.round(right/Q.qs.length*100);
+    const wrong=Q.qs.map((q,i)=>({q,a:Q.ans[i]})).filter(x=>x.a!==x.q.a);
+    body.innerHTML=`<div class="quiz"><div class="qcard result"><div class="big">${pct}%</div><p>${right} из ${Q.qs.length} верно. ${pct>=80?'Отличный уровень — можно идти на колок.':pct>=60?'Неплохо, повтори темы с ошибками.':'Стоит вернуться к препаратам и теории.'}</p>
+    <div class="qnav" style="justify-content:center"><button class="btn" id="qagain">Пройти ещё раз</button></div>
+    ${wrong.length?`<div class="review"><b style="font-size:14px">Разбор ошибок</b>${wrong.map(x=>`<div><b>${esc(x.q.q)}</b>Правильно: ${esc(x.q.opts[x.q.a])}</div>`).join('')}</div>`:''}</div></div>`;
+    $('#qagain').onclick=()=>{st.quiz={qs:buildQuiz(),i:0,ans:[],done:false};renderQuiz()};return}
+  const q=Q.qs[Q.i],ans=Q.ans[Q.i],answered=ans!=null;
+  body.innerHTML=`<div class="quiz"><div class="qhead"><span class="qcount">${Q.i+1} / ${Q.qs.length}</span><div class="bar"><i style="width:${(Q.i)/Q.qs.length*100}%"></i></div></div>
+  <div class="qcard">${q.img?`<div class="qimg"><img src="${IMG[q.img].f}" alt=""><span class="mark" style="left:${q.pin[0]}%;top:${q.pin[1]}%">?</span></div>`:''}
+  <h3>${esc(q.q)}</h3><div class="opts">${q.opts.map((o,i)=>{let cls='';if(answered){if(i===q.a)cls='right';else if(i===ans)cls='wrong'}return `<button class="opt ${cls}" data-a="${i}" ${answered?'disabled':''}>${esc(o)}</button>`}).join('')}</div>
+  ${answered?`<div class="explain ${ans===q.a?'ok':'no'}"><b>${ans===q.a?'Верно.':'Неверно. Правильный ответ: '+esc(q.opts[q.a])}</b>${esc(q.ex)}</div>
+  <div class="qnav"><button class="btn" id="qnext">${Q.i+1<Q.qs.length?'Дальше':'Результат'}</button></div>`:''}</div></div>`;
+  body.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{Q.ans[Q.i]=+b.dataset.a;renderQuiz()});
+  const n=$('#qnext');if(n)n.onclick=()=>{if(Q.i+1<Q.qs.length)Q.i++;else{Q.done=true;const right=Q.ans.filter((a,i)=>a===Q.qs[i].a).length;const pct=Math.round(right/Q.qs.length*100);SCORES[key]=Math.max(SCORES[key]||0,pct);store.set('scores',SCORES);renderNav()}renderQuiz();window.scrollTo(0,0)};
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&st.sel&&!st.hide){st.sel=null;if(st.tab==='preps')renderPreps()}});
+render();
+})();
+</script>
+</body>
+</html>
