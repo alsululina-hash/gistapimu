@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Гистоатлас к колку</title>
 <meta name="description" content="Интерактивные препараты, электронограммы, теория и тесты по темам 14–21">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4A3A93">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Гистоатлас">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Unbounded:wght@500;700&display=swap">
@@ -197,6 +203,17 @@ button{font:inherit;color:inherit;cursor:pointer}
 .qimg.em{max-width:560px;margin-inline:auto}
 .more{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px}
 .zt{font:600 10.5px var(--f-body);color:var(--eosin);background:var(--eosin-soft);border-radius:99px;padding:1px 7px;margin-left:2px}
+
+.off-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px;max-width:1000px}
+.off-card{display:grid;gap:12px;align-content:start}
+.off-card h3{font:700 18px/1.25 var(--f-display);margin:0}
+.off-card h4{margin:6px 0 0;font:600 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--hema)}
+.off-card p{margin:0;max-width:65ch}
+.off-card .btn{justify-self:start;text-decoration:none;display:inline-block}
+.off-bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.off-bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .2s}
+.off-status{font-size:13.5px;color:var(--ink-2)}
+.off-note{font-size:13px;color:var(--muted)}
 /* responsive */
 @media (max-width:1100px){.viewer,.emview,.theory{grid-template-columns:minmax(0,1fr)}.panel{position:static}}
 @media (max-width:760px){
@@ -236,6 +253,8 @@ button{font:inherit;color:inherit;cursor:pointer}
   <main class="main" id="main"></main>
 </div>
 
+<script src="offline_list.js"></script>
+<script src="offline.js"></script>
 <script src="structs.js"></script>
 <script src="data.js"></script>
 <script src="em.js"></script>
@@ -280,12 +299,14 @@ function renderNav(){
     const s=SCORES[B.fin];
     h+=`<button data-ch="${B.fin}" aria-current="${st.ch===B.fin}"><span class="num">Σ</span><span class="nt">${esc(B.ft)}</span><span class="short">${esc(B.fs||'Итог')}</span><span class="score ${s>=80?'good':''}">${s!=null?s+'%':''}</span></button>`;
   }
+  h+=`<div class="nav-label">Без интернета</div><button data-ch="offline" aria-current="${st.ch==='offline'}"><span class="num">⤓</span><span class="nt">Скачать на устройство</span><span class="short">Скачать</span><span class="score"></span></button>`;
   n.innerHTML=h;
   n.querySelectorAll('button[data-ch]').forEach(b=>b.onclick=()=>{st.ch=b.dataset.ch;st.prep=null;st.em=null;st.sel=null;st.quiz=null;if(isFinal(st.ch))st.tab='quiz';else if(st.tab==='quiz'&&false)st.tab='preps';store.set('ch',st.ch);render();window.scrollTo(0,0)});
   const cur=n.querySelector('[aria-current="true"]');if(cur&&cur.scrollIntoView&&window.innerWidth<760)cur.scrollIntoView({inline:'center',block:'nearest'});
 }
 
 function render(){renderNav();const m=$('#main');
+  if(st.ch==='offline'){window.renderOffline(m);return}
   if(isFinal(st.ch)){const B=finBlock(st.ch);m.innerHTML=`<div class="ch-head"><div><div class="eyebrow">${esc(B.t)}</div><h2>Итоговый тест</h2></div></div><div id="tabbody"></div>`;renderQuiz();return}
   const c=CH.find(x=>x.id===st.ch)||CH[0];st.ch=c.id;
   const tabs=[['preps','Препараты'],['em','Электронограммы'],['theory','Теория'],['quiz','Тест']];
